@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simple Calorie Counter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 20px; }
+    input, button { width: 100%; padding: 12px; margin: 6px 0; font-size: 16px; }
+    .entry { border-bottom: 1px solid #ccc; padding: 8px 0; }
+  </style>
+</head>
+<body>
+  <h1>Calorie Counter</h1>
+
+  <input id="food" placeholder="Food name">
+  <input id="calories" type="number" placeholder="Calories">
+  <button onclick="addFood()">Add Food</button>
+
+  <h2>Total: <span id="total">0</span> calories</h2>
+  <div id="list"></div>
+
+  <button onclick="clearDay()">Clear Today</button>
+
+  <script>
+    const today = new Date().toISOString().slice(0, 10);
+    let entries = JSON.parse(localStorage.getItem(today)) || [];
+
+    function save() {
+      localStorage.setItem(today, JSON.stringify(entries));
+      render();
+    }
+
+    function addFood() {
+      const food = document.getElementById('food').value;
+      const calories = Number(document.getElementById('calories').value);
+
+      if (!food || !calories) return;
+
+      entries.push({ food, calories });
+      document.getElementById('food').value = '';
+      document.getElementById('calories').value = '';
+      save();
+    }
+
+    function clearDay() {
+      entries = [];
+      save();
+    }
+
+    function render() {
+      let total = 0;
+      const list = document.getElementById('list');
+      list.innerHTML = '';
+
+      entries.forEach(entry => {
+        total += entry.calories;
+        list.innerHTML += `<div class="entry">${entry.food}: ${entry.calories} cal</div>`;
+      });
+
+      document.getElementById('total').textContent = total;
+    }
+
+    render();
+  </script>
+</body>
+</html>
