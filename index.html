@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Calorie Counter v4</title>
+  <title>Calorie Counter</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#222222">
   <link rel="manifest" href="manifest.json">
@@ -98,7 +98,7 @@
 
 <body>
 
-<h1>Calorie Counter v4</h1>
+<h1>Calorie Counter</h1>
 <div class="small" id="date"></div>
 
 <div class="card">
@@ -407,6 +407,21 @@ function useBuiltInFood(food, calories, protein) {
   document.getElementById("protein").value = protein;
 }
 
+function addScannedFood(food, calories, protein) {
+  const meal = document.getElementById("meal").value;
+
+  entries.push({
+    food: food,
+    calories: Number(calories) || 0,
+    protein: Number(protein) || 0,
+    meal: meal
+  });
+
+  saveToday();
+  document.getElementById("barcodeResult").innerHTML = "Added: " + escapeHtml(food);
+  document.getElementById("barcode").value = "";
+}
+
 async function startScanner() {
   const video = document.getElementById("camera");
   const resultDiv = document.getElementById("barcodeResult");
@@ -493,7 +508,8 @@ async function lookupBarcode() {
       <div class="entry">
         <b>${escapeHtml(name)}</b><br>
         Per 100g: ${calories} cal, ${protein}g protein
-        <button onclick='useBuiltInFood(${JSON.stringify(name)}, ${calories}, ${protein})'>Use This Food</button>
+        <button onclick='addScannedFood(${JSON.stringify(name)}, ${calories}, ${protein})'>Add This Product to Today</button>
+        <button class="secondary" onclick='useBuiltInFood(${JSON.stringify(name)}, ${calories}, ${protein})'>Edit Before Adding</button>
       </div>
     `;
   } catch (error) {
