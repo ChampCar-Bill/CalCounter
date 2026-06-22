@@ -228,7 +228,7 @@
 
 <script>
 const today = new Date().toISOString().slice(0, 10);
-const GOOGLE_SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz6PBcOjW5yJ0DouFA3_8IEq4ZWLTRHYKqoSiFV5CWAl5PudpNGGlWPrE9Sm_GBoruw/exec";
+const GOOGLE_SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwTH54DZpWCv3BFAtawuDZ-X4TxJIU2A9SbI05RZnwHOTfWzF0zY9RLnWtXXIMH1KTZ/exec";
 document.getElementById("date").textContent = "Today: " + today;
 
 let entries = JSON.parse(localStorage.getItem("food-" + today)) || [];
