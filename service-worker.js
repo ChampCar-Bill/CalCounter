@@ -1,4 +1,4 @@
-const CACHE_NAME = "calorie-counter-v4";
+const CACHE_NAME = "calorie-counter-v6";
 
 const FILES_TO_CACHE = [
   "./",
@@ -29,8 +29,6 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
   event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
-    })
+    fetch(event.request).catch(() => caches.match(event.request))
   );
 });
