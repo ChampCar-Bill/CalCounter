@@ -1,4 +1,4 @@
-const CACHE_NAME = "calorie-counter-v6";
+const CACHE_NAME = "calorie-counter-v7";
 
 const FILES_TO_CACHE = [
   "./",
