@@ -164,7 +164,7 @@
 
 <div class="card">
   <h2>Family Member</h2>
-  <p class="small">Choose who is using the app. Each food entry will be saved to the Google Sheet with this name.</p>
+  <p class="small">Choose who is using the app. Each person now has separate local food logs, weights, and goals, and each food entry is saved to the Google Sheet with this name.</p>
 
   <select id="familyMember" onchange="saveFamilyMember()">
     <option>Bill</option>
@@ -338,20 +338,48 @@ const today = new Date().toISOString().slice(0, 10);
 const GOOGLE_SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwTH54DZpWCv3BFAtawuDZ-X4TxJIU2A9SbI05RZnwHOTfWzF0zY9RLnWtXXIMH1KTZ/exec";
 document.getElementById("date").textContent = "Today: " + today;
 
-let entries = JSON.parse(localStorage.getItem("food-" + today)) || [];
+let entries = [];
 let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
-let weights = JSON.parse(localStorage.getItem("weights")) || {};
+let weights = {};
 let templates = JSON.parse(localStorage.getItem("mealTemplates")) || [];
 let familyMembers = JSON.parse(localStorage.getItem("familyMembers")) || ["Bill", "Aimee", "Kate", "Ian", "Ashley"];
 let selectedFamilyMember = localStorage.getItem("selectedFamilyMember") || familyMembers[0] || "Bill";
-let goal = Number(localStorage.getItem("goal")) || 2000;
-let proteinGoal = Number(localStorage.getItem("proteinGoal")) || 150;
-let carbGoal = Number(localStorage.getItem("carbGoal")) || 200;
-let fatGoal = Number(localStorage.getItem("fatGoal")) || 70;
-let fiberGoal = Number(localStorage.getItem("fiberGoal")) || 25;
+let goal = 2000;
+let proteinGoal = 150;
+let carbGoal = 200;
+let fatGoal = 70;
+let fiberGoal = 25;
 let editIndex = null;
 let scannerStream = null;
 let scannerInterval = null;
+
+function userKey(base) {
+  return selectedFamilyMember + "-" + base;
+}
+
+function foodKeyForDate(date) {
+  return "food-" + selectedFamilyMember + "-" + date;
+}
+
+function loadUserData() {
+  entries = JSON.parse(localStorage.getItem(foodKeyForDate(today))) || [];
+  weights = JSON.parse(localStorage.getItem(userKey("weights"))) || {};
+  goal = Number(localStorage.getItem(userKey("goal"))) || 2000;
+  proteinGoal = Number(localStorage.getItem(userKey("proteinGoal"))) || 150;
+  carbGoal = Number(localStorage.getItem(userKey("carbGoal"))) || 200;
+  fatGoal = Number(localStorage.getItem(userKey("fatGoal"))) || 70;
+  fiberGoal = Number(localStorage.getItem(userKey("fiberGoal"))) || 25;
+
+  }
+
+function renderAll() {
+  renderFamilyMembers();
+  render();
+  renderFavorites();
+  renderTemplates();
+  renderWeights();
+  renderWeekly();
+}
 
 const builtInFoods = [
   { food: "Egg", calories: 70, protein: 6, carbs: 0.5, fat: 5, fiber: 0 },
@@ -376,12 +404,6 @@ const builtInFoods = [
   { food: "Orange", calories: 62, protein: 1, carbs: 15, fat: 0, fiber: 3 }
 ];
 
-document.getElementById("goal").value = goal;
-document.getElementById("proteinGoal").value = proteinGoal;
-document.getElementById("carbGoal").value = carbGoal;
-document.getElementById("fatGoal").value = fatGoal;
-document.getElementById("fiberGoal").value = fiberGoal;
-
 function renderFamilyMembers() {
   const select = document.getElementById("familyMember");
   if (!select) return;
@@ -399,6 +421,8 @@ function saveFamilyMember() {
   const select = document.getElementById("familyMember");
   selectedFamilyMember = select.value;
   localStorage.setItem("selectedFamilyMember", selectedFamilyMember);
+  loadUserData();
+  renderAll();
 }
 
 function addFamilyMember() {
@@ -433,11 +457,11 @@ function saveGoals() {
   fatGoal = Number(document.getElementById("fatGoal").value) || 0;
   fiberGoal = Number(document.getElementById("fiberGoal").value) || 0;
 
-  localStorage.setItem("goal", goal);
-  localStorage.setItem("proteinGoal", proteinGoal);
-  localStorage.setItem("carbGoal", carbGoal);
-  localStorage.setItem("fatGoal", fatGoal);
-  localStorage.setItem("fiberGoal", fiberGoal);
+  localStorage.setItem(userKey("goal"), goal);
+  localStorage.setItem(userKey("proteinGoal"), proteinGoal);
+  localStorage.setItem(userKey("carbGoal"), carbGoal);
+  localStorage.setItem(userKey("fatGoal"), fatGoal);
+  localStorage.setItem(userKey("fiberGoal"), fiberGoal);
   render();
 }
 
@@ -797,7 +821,7 @@ function deleteMealTemplate() {
 }
 
 function saveToday() {
-  localStorage.setItem("food-" + today, JSON.stringify(entries));
+  localStorage.setItem(foodKeyForDate(today), JSON.stringify(entries));
   render();
 }
 
@@ -857,7 +881,7 @@ function saveWeight() {
   }
 
   weights[today] = weight;
-  localStorage.setItem("weights", JSON.stringify(weights));
+  localStorage.setItem(userKey("weights"), JSON.stringify(weights));
   document.getElementById("weight").value = "";
   renderWeights();
   renderWeekly();
@@ -868,11 +892,21 @@ function exportCSV() {
 
   Object.keys(localStorage).forEach(key => {
     if (key.startsWith("food-")) {
-      const date = key.replace("food-", "");
+      const parts = key.split("-");
+      let date = "";
+      let user = selectedFamilyMember || "Unknown";
+
+      if (parts.length >= 5) {
+        user = parts[1];
+        date = parts.slice(2).join("-");
+      } else {
+        date = key.replace("food-", "");
+      }
+
       const dayEntries = JSON.parse(localStorage.getItem(key)) || [];
 
       dayEntries.forEach(e => {
-        csv += `${date},${csvSafe(e.user || selectedFamilyMember || "Unknown")},${csvSafe(e.meal)},${csvSafe(e.food)},${e.calories || 0},${e.protein || 0},${e.carbs || 0},${e.fat || 0},${e.fiber || 0}\n`;
+        csv += `${date},${csvSafe(e.user || user)},${csvSafe(e.meal)},${csvSafe(e.food)},${e.calories || 0},${e.protein || 0},${e.carbs || 0},${e.fat || 0},${e.fiber || 0}\n`;
       });
     }
   });
@@ -949,7 +983,7 @@ function renderWeekly() {
   let bestDay = "None";
 
   dates.forEach(date => {
-    const dayEntries = JSON.parse(localStorage.getItem("food-" + date)) || [];
+    const dayEntries = JSON.parse(localStorage.getItem(foodKeyForDate(date))) || [];
     if (dayEntries.length > 0) daysWithFood++;
 
     const dayCalories = dayEntries.reduce((sum, e) => sum + Number(e.calories || 0), 0);
@@ -1171,6 +1205,7 @@ if ("serviceWorker" in navigator) {
 }
 
 renderFamilyMembers();
+loadUserData();
 render();
 renderFavorites();
 renderTemplates();
