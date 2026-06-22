@@ -152,17 +152,6 @@
 <div class="small">Google Sheet sync is enabled. Entries are saved locally and copied to your Sheet.</div>
 
 <div class="card">
-  <h2>Today at a Glance</h2>
-  <div class="grid">
-    <div class="stat"><b>Current User</b><br><span id="currentUser">Bill</span></div>
-    <div class="stat"><b>Current Weight</b><br><span id="currentWeight">No weight yet</span></div>
-    <div class="stat"><b>Today's Calories</b><br><span id="glanceCalories">0</span></div>
-    <div class="stat"><b>Today's Protein</b><br><span id="glanceProtein">0</span>g</div>
-    <div class="stat"><b>Google Sheet Sync</b><br><span id="syncStatus">Ready</span></div>
-  </div>
-</div>
-
-<div class="card">
   <h2>Family Member</h2>
   <p class="small">Choose who is using the app. Each person now has separate local food logs, weights, and goals, and each food entry is saved to the Google Sheet with this name.</p>
 
@@ -176,7 +165,20 @@
 
   <input id="customFamilyMember" placeholder="Add another family member name">
   <button onclick="addFamilyMember()">Add Family Member</button>
+</div>  
+
+<div class="card">
+  <h2>Today at a Glance</h2>
+  <div class="grid">
+    <div class="stat"><b>Current User</b><br><span id="currentUser">Bill</span></div>
+    <div class="stat"><b>Current Weight</b><br><span id="currentWeight">No weight yet</span></div>
+    <div class="stat"><b>Today's Calories</b><br><span id="glanceCalories">0</span></div>
+    <div class="stat"><b>Today's Protein</b><br><span id="glanceProtein">0</span>g</div>
+    <div class="stat"><b>Google Sheet Sync</b><br><span id="syncStatus">Ready</span></div>
+  </div>
 </div>
+
+
 
 <div class="card" id="dashboard">
   <h2>Daily Dashboard</h2>
