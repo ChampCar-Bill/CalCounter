@@ -153,6 +153,7 @@
 
 <div class="card" id="dashboard">
   <h2>Daily Dashboard</h2>
+  <p class="small">This section shows what you have eaten today compared to your daily goals.</p>
 
   <input id="goal" type="number" placeholder="Daily calorie goal">
   <input id="proteinGoal" type="number" placeholder="Daily protein goal in grams">
@@ -162,24 +163,24 @@
   <button onclick="saveGoals()">Save Goals</button>
 
   <div class="grid">
-    <div class="stat"><b>Calories</b><br><span id="total">0</span> / <span id="goalDisplay">0</span></div>
-    <div class="stat"><b>Remaining</b><br><span id="remaining">0</span></div>
-    <div class="stat"><b>Protein</b><br><span id="proteinTotal">0</span>g / <span id="proteinGoalDisplay">0</span>g</div>
-    <div class="stat"><b>Today</b><br><span id="entryCount">0</span> items</div>
+    <div class="stat"><b>Calories Eaten</b><br><span id="total">0</span> / <span id="goalDisplay">0</span></div>
+    <div class="stat"><b>Calories Left Today</b><br><span id="remaining">0</span></div>
+    <div class="stat"><b>Protein Eaten</b><br><span id="proteinTotal">0</span>g / <span id="proteinGoalDisplay">0</span>g</div>
+    <div class="stat"><b>Food Items Logged</b><br><span id="entryCount">0</span> items</div>
   </div>
 
   <h3>Progress</h3>
-  <div class="small">Calories</div><div class="progress"><div class="bar" id="calorieBar"></div></div>
-  <div class="small">Protein</div><div class="progress"><div class="bar" id="proteinBar"></div></div>
-  <div class="small">Carbs</div><div class="progress"><div class="bar" id="carbBar"></div></div>
-  <div class="small">Fat</div><div class="progress"><div class="bar" id="fatBar"></div></div>
-  <div class="small">Fiber</div><div class="progress"><div class="bar" id="fiberBar"></div></div>
+  <div class="small">Calories Progress</div><div class="progress"><div class="bar" id="calorieBar"></div></div>
+  <div class="small">Protein Progress</div><div class="progress"><div class="bar" id="proteinBar"></div></div>
+  <div class="small">Carbs Progress</div><div class="progress"><div class="bar" id="carbBar"></div></div>
+  <div class="small">Fat Progress</div><div class="progress"><div class="bar" id="fatBar"></div></div>
+  <div class="small">Fiber Progress</div><div class="progress"><div class="bar" id="fiberBar"></div></div>
 
   <div class="grid">
-    <div class="stat"><b>Carbs</b><br><span id="carbTotal">0</span>g</div>
-    <div class="stat"><b>Fat</b><br><span id="fatTotal">0</span>g</div>
-    <div class="stat"><b>Fiber</b><br><span id="fiberTotal">0</span>g</div>
-    <div class="stat"><b>Est. Cal from Macros</b><br><span id="macroCalories">0</span></div>
+    <div class="stat"><b>Carbs Eaten</b><br><span id="carbTotal">0</span>g</div>
+    <div class="stat"><b>Fat Eaten</b><br><span id="fatTotal">0</span>g</div>
+    <div class="stat"><b>Fiber Eaten</b><br><span id="fiberTotal">0</span>g</div>
+    <div class="stat"><b>Calories From Macros</b><br><span id="macroCalories">0</span></div>
   </div>
 </div>
 
