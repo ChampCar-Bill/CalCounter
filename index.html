@@ -154,11 +154,28 @@
 <div class="card">
   <h2>Today at a Glance</h2>
   <div class="grid">
+    <div class="stat"><b>Current User</b><br><span id="currentUser">Bill</span></div>
     <div class="stat"><b>Current Weight</b><br><span id="currentWeight">No weight yet</span></div>
     <div class="stat"><b>Today's Calories</b><br><span id="glanceCalories">0</span></div>
     <div class="stat"><b>Today's Protein</b><br><span id="glanceProtein">0</span>g</div>
     <div class="stat"><b>Google Sheet Sync</b><br><span id="syncStatus">Ready</span></div>
   </div>
+</div>
+
+<div class="card">
+  <h2>Family Member</h2>
+  <p class="small">Choose who is using the app. Each food entry will be saved to the Google Sheet with this name.</p>
+
+  <select id="familyMember" onchange="saveFamilyMember()">
+    <option>Bill</option>
+    <option>Aimee</option>
+    <option>Kate</option>
+    <option>Ian</option>
+    <option>Ashley</option>
+  </select>
+
+  <input id="customFamilyMember" placeholder="Add another family member name">
+  <button onclick="addFamilyMember()">Add Family Member</button>
 </div>
 
 <div class="card" id="dashboard">
@@ -168,25 +185,11 @@
     Set your daily nutrition targets. The dashboard compares what you eat today against these goals and shows your progress throughout the day.
   </p>
 
-<label><b>Daily Calories Goal</b></label>
-<div class="small">Total calories you want to eat each day.</div>
-<input id="goal" type="number">
-
-<label><b>Daily Protein Goal</b></label>
-<div class="small">Helps maintain and build muscle.</div>
-<input id="proteinGoal" type="number">
-
-<label><b>Daily Carbohydrate Goal</b></label>
-<div class="small">Your body's primary energy source.</div>
-<input id="carbGoal" type="number">
-
-<label><b>Daily Fat Goal</b></label>
-<div class="small">Supports hormones and overall health.</div>
-<input id="fatGoal" type="number">
-
-<label><b>Daily Fiber Goal</b></label>
-<div class="small">Supports digestion and helps control hunger.</div>
-<input id="fiberGoal" type="number">
+  <input id="goal" type="number" placeholder="Daily calorie target (example: 2200)">
+  <input id="proteinGoal" type="number" placeholder="Daily protein target in grams (example: 180)">
+  <input id="carbGoal" type="number" placeholder="Daily carb target in grams (example: 200)">
+  <input id="fatGoal" type="number" placeholder="Daily fat target in grams (example: 70)">
+  <input id="fiberGoal" type="number" placeholder="Daily fiber target in grams (example: 25)">
   <button onclick="saveGoals()">Save Goals</button>
 
   <div class="small">
@@ -339,6 +342,8 @@ let entries = JSON.parse(localStorage.getItem("food-" + today)) || [];
 let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
 let weights = JSON.parse(localStorage.getItem("weights")) || {};
 let templates = JSON.parse(localStorage.getItem("mealTemplates")) || [];
+let familyMembers = JSON.parse(localStorage.getItem("familyMembers")) || ["Bill", "Aimee", "Kate", "Ian", "Ashley"];
+let selectedFamilyMember = localStorage.getItem("selectedFamilyMember") || familyMembers[0] || "Bill";
 let goal = Number(localStorage.getItem("goal")) || 2000;
 let proteinGoal = Number(localStorage.getItem("proteinGoal")) || 150;
 let carbGoal = Number(localStorage.getItem("carbGoal")) || 200;
@@ -377,6 +382,46 @@ document.getElementById("carbGoal").value = carbGoal;
 document.getElementById("fatGoal").value = fatGoal;
 document.getElementById("fiberGoal").value = fiberGoal;
 
+function renderFamilyMembers() {
+  const select = document.getElementById("familyMember");
+  if (!select) return;
+
+  select.innerHTML = "";
+
+  familyMembers.forEach(name => {
+    select.innerHTML += `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`;
+  });
+
+  select.value = selectedFamilyMember;
+}
+
+function saveFamilyMember() {
+  const select = document.getElementById("familyMember");
+  selectedFamilyMember = select.value;
+  localStorage.setItem("selectedFamilyMember", selectedFamilyMember);
+}
+
+function addFamilyMember() {
+  const input = document.getElementById("customFamilyMember");
+  const name = input.value.trim();
+
+  if (!name) {
+    alert("Enter a family member name.");
+    return;
+  }
+
+  if (!familyMembers.includes(name)) {
+    familyMembers.push(name);
+  }
+
+  selectedFamilyMember = name;
+  localStorage.setItem("familyMembers", JSON.stringify(familyMembers));
+  localStorage.setItem("selectedFamilyMember", selectedFamilyMember);
+
+  input.value = "";
+  renderFamilyMembers();
+}
+
 function jumpTo(id) {
   document.getElementById(id).scrollIntoView({ behavior: "smooth" });
 }
@@ -410,6 +455,7 @@ function getFoodFormItem() {
 
 function addFood() {
   const item = getFoodFormItem();
+  item.user = selectedFamilyMember || "Unknown";
 
   if (!item.food || !item.calories) {
     alert("Enter food name and calories.");
@@ -489,7 +535,8 @@ function addScannedFood(food, calories, protein, carbs, fat, fiber, alsoFavorite
     carbs: Number(carbs) || 0,
     fat: Number(fat) || 0,
     fiber: Number(fiber) || 0,
-    meal: document.getElementById("meal").value
+    meal: document.getElementById("meal").value,
+    user: selectedFamilyMember || "Unknown"
   };
 
   entries.push(item);
@@ -522,7 +569,7 @@ function addFavoriteFood() {
   if (index === "") return;
 
   const fav = favorites[index];
-  const item = { ...fav, meal: document.getElementById("meal").value };
+  const item = { ...fav, meal: document.getElementById("meal").value, user: selectedFamilyMember || "Unknown" };
   entries.push(item);
   saveMealToGoogleSheet(item, "favorite");
   saveToday();
@@ -699,7 +746,7 @@ function quickEstimate() {
 
   builtInFoods.forEach(item => {
     if (text.includes(item.food.toLowerCase())) {
-      const quickItem = { ...item, meal: document.getElementById("meal").value };
+      const quickItem = { ...item, meal: document.getElementById("meal").value, user: selectedFamilyMember || "Unknown" };
       entries.push(quickItem);
       saveMealToGoogleSheet(quickItem, "quick-estimate");
       added++;
@@ -731,7 +778,7 @@ function addMealTemplate() {
 
   const template = templates[index];
   template.items.forEach(t => {
-    const item = { ...t, meal: document.getElementById("meal").value || t.meal };
+    const item = { ...t, meal: document.getElementById("meal").value || t.meal, user: selectedFamilyMember || "Unknown" };
     entries.push(item);
     saveMealToGoogleSheet(item, "template");
   });
@@ -762,6 +809,7 @@ function saveMealToGoogleSheet(item, source) {
 
   const params = new URLSearchParams({
     action: "add",
+    user: selectedFamilyMember || "Unknown",
     date: today,
     meal: item.meal || "",
     food: item.food || "",
@@ -816,7 +864,7 @@ function saveWeight() {
 }
 
 function exportCSV() {
-  let csv = "Date,Meal,Food,Calories,Protein,Carbs,Fat,Fiber\n";
+  let csv = "Date,User,Meal,Food,Calories,Protein,Carbs,Fat,Fiber\n";
 
   Object.keys(localStorage).forEach(key => {
     if (key.startsWith("food-")) {
@@ -824,7 +872,7 @@ function exportCSV() {
       const dayEntries = JSON.parse(localStorage.getItem(key)) || [];
 
       dayEntries.forEach(e => {
-        csv += `${date},${csvSafe(e.meal)},${csvSafe(e.food)},${e.calories || 0},${e.protein || 0},${e.carbs || 0},${e.fat || 0},${e.fiber || 0}\n`;
+        csv += `${date},${csvSafe(e.user || selectedFamilyMember || "Unknown")},${csvSafe(e.meal)},${csvSafe(e.food)},${e.calories || 0},${e.protein || 0},${e.carbs || 0},${e.fat || 0},${e.fiber || 0}\n`;
       });
     }
   });
@@ -945,6 +993,7 @@ function render() {
   document.getElementById("fiberTotal").textContent = round1(totals.fiber);
   document.getElementById("macroCalories").textContent = Math.round((totals.protein * 4) + (totals.carbs * 4) + (totals.fat * 9));
 
+  document.getElementById("currentUser").textContent = selectedFamilyMember || "Unknown";
   document.getElementById("glanceCalories").textContent = totals.calories;
   document.getElementById("glanceProtein").textContent = round1(totals.protein);
 
@@ -1121,6 +1170,7 @@ if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js");
 }
 
+renderFamilyMembers();
 render();
 renderFavorites();
 renderTemplates();
